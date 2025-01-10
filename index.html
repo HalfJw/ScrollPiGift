@@ -23,7 +23,7 @@
             const responseElement = document.getElementById('response');
 
             try {
-                const response = await fetch('http://<raspberry-pi-ip>:5000/display', {
+                const response = await fetch('http://127.0.0.1:5000/display', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
