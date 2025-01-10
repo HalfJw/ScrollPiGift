@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Message to Raspberry Pi</title>
+    <title>Scroll pHAT HD Controller</title>
 </head>
 <body>
     <h1>Send a Message to Scroll pHAT HD</h1>
@@ -15,6 +15,28 @@
     <p id="response"></p>
 
     <script>
+        let ngrokUrl = '';
+
+        // Fetch the ngrok URL dynamically
+        async function getNgrokUrl() {
+            try {
+                const response = await fetch('/ngrok-url');
+                if (response.ok) {
+                    const data = await response.json();
+                    ngrokUrl = data.url; // Store the ngrok URL
+                    console.log(`ngrok URL: ${ngrokUrl}`);
+                } else {
+                    console.error('Failed to fetch ngrok URL');
+                }
+            } catch (error) {
+                console.error('Error fetching ngrok URL:', error);
+            }
+        }
+
+        // Call this function when the page loads
+        window.onload = getNgrokUrl;
+
+        // Handle form submission
         const form = document.getElementById('messageForm');
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -22,8 +44,13 @@
             const message = document.getElementById('message').value;
             const responseElement = document.getElementById('response');
 
+            if (!ngrokUrl) {
+                responseElement.textContent = 'ngrok URL not yet loaded.';
+                return;
+            }
+
             try {
-                const response = await fetch('http://127.0.0.1:5000/display', {
+                const response = await fetch(`${ngrokUrl}/display`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
@@ -36,7 +63,7 @@
                     responseElement.textContent = 'Failed to send message.';
                 }
             } catch (error) {
-                responseElement.textContent = 'Error connecting to the Raspberry Pi.';
+                responseElement.textContent = 'Error connecting to the server.';
             }
         });
     </script>
