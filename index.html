@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Message to Raspberry Pi</title>
+</head>
+<body>
+    <h1>Send a Message to Scroll pHAT HD</h1>
+    <form id="messageForm">
+        <label for="message">Enter your message:</label>
+        <input type="text" id="message" name="message" required />
+        <button type="submit">Send</button>
+    </form>
+    <p id="response"></p>
+
+    <script>
+        const form = document.getElementById('messageForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const message = document.getElementById('message').value;
+            const responseElement = document.getElementById('response');
+
+            try {
+                const response = await fetch('http://<raspberry-pi-ip>:5000/display', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    responseElement.textContent = `Message sent: ${data.message}`;
+                } else {
+                    responseElement.textContent = 'Failed to send message.';
+                }
+            } catch (error) {
+                responseElement.textContent = 'Error connecting to the Raspberry Pi.';
+            }
+        });
+    </script>
+</body>
+</html>
