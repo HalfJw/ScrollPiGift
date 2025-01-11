@@ -13,23 +13,27 @@
         <button type="submit">Send</button>
     </form>
     <p id="response"></p>
+    <p id="ngrokStatus">Loading ngrok URL...</p>
 
     <script>
         let ngrokUrl = '';
 
         // Fetch the ngrok URL dynamically
         async function getNgrokUrl() {
+            const ngrokStatus = document.getElementById('ngrokStatus');
             try {
-                const response = await fetch('/ngrok-url');
+                const response = await fetch('/ngrok-url'); // Update this to your backend URL if necessary
                 if (response.ok) {
                     const data = await response.json();
                     ngrokUrl = data.url; // Store the ngrok URL
                     console.log(`ngrok URL: ${ngrokUrl}`);
+                    ngrokStatus.textContent = `Connected to ngrok: ${ngrokUrl}`;
                 } else {
-                    console.error('Failed to fetch ngrok URL');
+                    throw new Error('Failed to fetch ngrok URL');
                 }
             } catch (error) {
                 console.error('Error fetching ngrok URL:', error);
+                ngrokStatus.textContent = 'Error: Unable to load ngrok URL. Please try again later.';
             }
         }
 
@@ -45,7 +49,7 @@
             const responseElement = document.getElementById('response');
 
             if (!ngrokUrl) {
-                responseElement.textContent = 'ngrok URL not yet loaded.';
+                responseElement.textContent = 'ngrok URL not yet loaded. Please wait and try again.';
                 return;
             }
 
@@ -60,10 +64,12 @@
                     const data = await response.json();
                     responseElement.textContent = `Message sent: ${data.message}`;
                 } else {
-                    responseElement.textContent = 'Failed to send message.';
+                    const errorText = await response.text();
+                    responseElement.textContent = `Failed to send message: ${errorText}`;
                 }
             } catch (error) {
-                responseElement.textContent = 'Error connecting to the server.';
+                console.error('Error sending message:', error);
+                responseElement.textContent = 'Error: Unable to connect to the server.';
             }
         });
     </script>

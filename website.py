@@ -2,13 +2,30 @@ from flask import Flask, request, jsonify
 from pyngrok import ngrok
 import scrollphathd
 import time
+#import requests
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Start ngrok tunnel for Flask server
-public_url = ngrok.connect(5000)
-print(f"ngrok Public URL: {public_url}")
+def start_ngrok():
+    """Start ngrok tunnel and ensure the public URL is available."""
+    tunnel = ngrok.connect(5000)
+    print(f"ngrok Public URL: {tunnel.public_url}")
+    return tunnel.public_url
+
+# Initialize ngrok public URL
+public_url = None
+for attempt in range(5):  # Retry up to 5 times to get the public URL
+    try:
+        public_url = start_ngrok()
+        break
+    except Exception as e:
+        print(f"Attempt {attempt + 1}: Failed to get ngrok URL. Retrying...")
+        time.sleep(2)
+
+if not public_url:
+    raise RuntimeError("Failed to start ngrok tunnel after multiple attempts.")
 
 @app.route("/")
 def home():
